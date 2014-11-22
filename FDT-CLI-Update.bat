@@ -6,7 +6,7 @@ REM eMail: Jonathan Barda <jonathan.barda@gmail.com>
 REM
 REM Last Modification: 19.11.2014 - 12:32
 REM Last Changes:
-REM	- Added copyright stuff and kind of changelog
+REM - Added copyright stuff and kind of changelog
 REM - Fixed .jar file path
 REM - Fixed Java detection
 
