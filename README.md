@@ -13,7 +13,7 @@ Platforms:
   - Using parameters: Windows / Linux / Mac (if java is installed)
 
 Features:
-  - Drag'n'Drop
+  - Drag'n'Drop on script
   - Copy / Paste on script
   - Copy / Move mode
 
