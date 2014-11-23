@@ -28,7 +28,7 @@ goto detect_server
 
 REM Detect if FDT is started
 :detect_server
-REM netstat -ano			List all open ports without dns resolution and programs PID given
+REM netstat -ano		List all open ports without dns resolution and programs PID given
 REM find /c /i "54321"		Search in the result from netstat if the FDT port is open, if not, starting the server
 for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 	if %%s NEQ 0 (
