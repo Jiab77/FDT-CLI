@@ -4,13 +4,14 @@ REM 32Bit and 64Bit Version
 REM
 REM eMail: Jonathan Barda <jonathan.barda@gmail.com>
 REM
-REM Last Modification: 19.11.2014 - 12:31
+REM Last Modification: 03.12.2014 - 16:07
 REM Last Changes:
 REM - Fixed FDT command line (used server defined twice)
 REM - Fixed bad system quotes handling
 REM - Fixed used process in error message
 REM - Fixed FDT client parameters
 REM - Fixed Java detection
+REM - Updated java detection
 REM
 REM TODO:
 REM - Fix empty folder bug
@@ -23,6 +24,14 @@ title %~nx0 - CLI For FDT
 
 REM FDT Config
 set "fdtPath=%~dp0" & set fdtPath=!fdtPath:~0,-1!
+
+REM Java Config
+set javaVersion=7
+if "%javaVersion%"=="7" (
+	set javaPath=jre7
+) else if "%javaVersion%"=="8" (
+	set javaPath=java8
+)
 
 REM Check the script named "FDT-CLI-Update.bat" to update the jar file.
 
@@ -39,9 +48,9 @@ set fdtParamsCLT=-noupdates -c localhost
 
 REM Adding java to the path if not already exist
 if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-	(echo "%path%" | find "%ProgramFiles%\Java\jre7\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\jre7\bin"
+	(echo "%path%" | find "%ProgramFiles%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\!javaPath!\bin"
 ) else (
-	(echo "%path%" | find "%ProgramFiles(x86)%\Java\jre7\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\jre7\bin"
+	(echo "%path%" | find "%ProgramFiles(x86)%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\!javaPath!\bin"
 )
 goto detect_server
 
