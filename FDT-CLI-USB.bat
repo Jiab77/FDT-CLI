@@ -4,7 +4,7 @@ REM 32Bit and 64Bit Version
 REM
 REM eMail: Jonathan Barda <jonathan.barda@gmail.com>
 REM
-REM Last Modification: 03.12.2014 - 16:07
+REM Last Modification: 12.12.2014 - 12:15
 REM Last Changes:
 REM - Fixed FDT command line (used server defined twice)
 REM - Fixed bad system quotes handling
@@ -12,6 +12,7 @@ REM - Fixed used process in error message
 REM - Fixed FDT client parameters
 REM - Fixed Java detection
 REM - Updated java detection
+REM - Back the non-blocking I/O mode
 REM
 REM TODO:
 REM - Fix empty folder bug
