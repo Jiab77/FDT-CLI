@@ -43,8 +43,8 @@ set fdtParamsSRV=-noupdates -bs 4M
 
 REM Removed -P 6, now using 4 streams as default. It seems to be better for multiple transfers
 REM Added "-noupdates" parameter in order to not interrupt the script process.
-REM set fdtParamsCLT=-noupdates -nbio -iof 3 -c localhost
-set fdtParamsCLT=-noupdates -c localhost
+set fdtParamsCLT=-noupdates -nbio -iof 3 -c localhost
+REM set fdtParamsCLT=-noupdates -c localhost
 
 REM Adding java to the path if not already exist
 if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
