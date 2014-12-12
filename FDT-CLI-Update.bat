@@ -1,14 +1,29 @@
 @echo off
-REM Made by Jonathan Barda AKA Jon - 2013
+REM Copyright (C) 2013  Jonathan Barda <jonathan.barda@gmail.com>
+
+REM This program is free software: you can redistribute it and/or modify
+REM it under the terms of the GNU General Public License as published by
+REM the Free Software Foundation, either version 3 of the License, or
+REM (at your option) any later version.
+
+REM This program is distributed in the hope that it will be useful,
+REM but WITHOUT ANY WARRANTY; without even the implied warranty of
+REM MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+REM GNU General Public License for more details.
+
+REM You should have received a copy of the GNU General Public License
+REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 REM 32Bit and 64Bit Version
-REM
-REM eMail: Jonathan Barda <jonathan.barda@gmail.com>
-REM
-REM Last Modification: 19.11.2014 - 12:32
+
+REM Last Modification: 12.12.2014 - 12:43
 REM Last Changes:
 REM - Added copyright stuff and kind of changelog
 REM - Fixed .jar file path
 REM - Fixed Java detection
+REM - Removed old copyright stuff
+REM - Removed unneeded "REM" command
+REM - GPL v3.0 text added
 
 
 for %%a in (cls echo) do %%a.
