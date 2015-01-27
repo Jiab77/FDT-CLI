@@ -16,7 +16,7 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 12.12.2014 - 12:43
+REM Last Modification: 21.01.2015 - 13:07
 REM Last Changes:
 REM - Fixed FDT command line (used server defined twice)
 REM - Fixed bad system quotes handling
@@ -28,6 +28,7 @@ REM - Back the non-blocking I/O mode
 REM - Removed old copyright stuff
 REM - Removed unneeded "REM" command
 REM - GPL v3.0 text added
+REM - Updated path for Java8
 REM
 REM TODO:
 REM - Fix empty folder bug
@@ -46,7 +47,8 @@ set javaVersion=7
 if "%javaVersion%"=="7" (
 	set javaPath=jre7
 ) else if "%javaVersion%"=="8" (
-	set javaPath=java8
+	set javaBuild=1.8.0_31
+	set javaPath=jre!javaBuild!
 )
 
 REM Check the script named "FDT-CLI-Update.bat" to update the jar file.
