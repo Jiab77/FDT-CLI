@@ -16,7 +16,7 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 12.12.2014 - 12:43
+REM Last Modification: 10.02.2015 - 22:54
 REM Last Changes:
 REM - Added copyright stuff and kind of changelog
 REM - Fixed .jar file path
@@ -24,8 +24,9 @@ REM - Fixed Java detection
 REM - Removed old copyright stuff
 REM - Removed unneeded "REM" command
 REM - GPL v3.0 text added
+REM - Updated path for Java8
 
-
+:begin
 for %%a in (cls echo) do %%a.
 setlocal EnableDelayedExpansion
 title %~nx0 - FDT CLI Updater
@@ -33,11 +34,20 @@ title %~nx0 - FDT CLI Updater
 REM FDT Config
 set "fdtPath=%~dp0" & set fdtPath=!fdtPath:~0,-1!
 
+REM Java Config
+set javaVersion=7
+if "%javaVersion%"=="7" (
+	set javaPath=jre7
+) else if "%javaVersion%"=="8" (
+	set javaBuild=1.8.0_31
+	set javaPath=jre!javaBuild!
+)
+
 REM Adding java to the path if not already exist
 if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-	(echo "%path%" | find "%ProgramFiles%\Java\jre7\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\jre7\bin"
+	(echo "%path%" | find "%ProgramFiles%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\!javaPath!\bin"
 ) else (
-	(echo "%path%" | find "%ProgramFiles(x86)%\Java\jre7\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\jre7\bin"
+	(echo "%path%" | find "%ProgramFiles(x86)%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\!javaPath!\bin"
 )
 goto detect_server
 
