@@ -23,4 +23,4 @@ Features:
     - Source;Destination
 
 Known Issues:
-  - Empty folders
+  - Files and folders with "()" in their names
