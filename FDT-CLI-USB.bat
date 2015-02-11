@@ -16,7 +16,7 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 11.02.2015 - 01:03
+REM Last Modification: 10.02.2015 - 13:42
 REM Last Changes:
 REM - Fixed FDT command line (used server defined twice)
 REM - Fixed bad system quotes handling
@@ -24,14 +24,12 @@ REM - Fixed used process in error message
 REM - Fixed FDT client parameters
 REM - Fixed Java detection
 REM - Updated java detection
-REM - Back the non-blocking I/O startMode
+REM - Back the non-blocking I/O mode
 REM - Removed old copyright stuff
 REM - Removed unneeded "REM" command
 REM - GPL v3.0 text added
 REM - Updated path for Java8
 REM - Changed params delimiter in for loops
-REM - Added feature to parse CSV files
-REM - Cleaned the code a bit
 REM
 REM TODO:
 REM - Fix empty folder bug
@@ -186,13 +184,13 @@ set count=0
 set countTemp=0
 set countTotal=0
 
-REM Process startMode
-set /p processDatastartMode=Move or Copy ? [M, C] : 
-if /i "%processDatastartMode%"=="M" (
-	set choosedProcessDatastartMode=move
+REM Process mode
+set /p processDataMode=Move or Copy ? [M, C] : 
+if /i "%processDataMode%"=="M" (
+	set choosedProcessDataMode=move
 	set processState=Moving
-) else if /i "%processDatastartMode%"=="C" (
-	set choosedProcessDatastartMode=copy
+) else if /i "%processDataMode%"=="C" (
+	set choosedProcessDataMode=copy
 	set processState=Copying
 ) else (
 	goto begin
@@ -203,10 +201,10 @@ if defined dragDrop (
 	REM echo dragDrop variable [NOT EMPTY]
 	REM Read from drag'n'drop
 	if /i "%1"=="auto" (
-		set startMode=%1
+		set mode=%1
 		set "listFile=%2"
 	) else (
-		set startMode=
+		set mode=
 		(echo "%dragDrop%" | find /i "list.txt">NUL) && (
 			set "listFile=%dragDrop%"
 		) || (
@@ -297,14 +295,10 @@ REM )
 REM echo. & pause & echo.
 
 REM Counting all items
-if not defined startMode (
-	for /f "delims=" %%? in (!listFile!) do ( set /a countTotal=!countTotal!+1 )
-) else (
-	for /f "skip=2 delims=;" %%? in (!listFile!) do ( set /a countTotal=!countTotal!+1 )
-)
+for /f "delims=" %%? in (!listFile!) do ( set /a countTotal=!countTotal!+1 )
 
 REM Output drive or directory
-if not defined startMode (
+if not defined mode (
 	set /p dataOut=Destination drive or directory : 
 )
 
@@ -322,7 +316,7 @@ if /i "%speedLimit%"=="Y" (
 REM Show Settings
 cls
 echo. & echo Config details: & echo.
-echo - Processing startMode: %choosedProcessDatastartMode%
+echo - Processing Mode: %choosedProcessDataMode%
 echo - FDT Parameters: !fdtParamsCLT!
 if exist "!listFile!" (
 	echo - Using list: Yes
@@ -331,8 +325,8 @@ if exist "!listFile!" (
 	echo - Using list: No
 )
 REM Showing the data source
-if not defined dragDrop ( echo - Source: !dataIn! ) else ( echo - Source: From list )
-if not defined startMode ( echo - Destination: %dataOut% ) else ( echo - Destination: From list )
+if not defined dragDrop ( echo - Source: !dataIn! ) else ( echo - Source: External )
+if not defined mode ( echo - Destination: %dataOut% ) else ( echo - Destination: From list )
 if /i "%speedLimit%"=="Y" (
 	echo - Speed Limit: Yes
 	echo - Bandwidth limited to: !fdtLimit!b/s
@@ -343,7 +337,7 @@ echo.
 set /p configGood=Everything is correct ? [Y, N] : 
 REM if /i "%configGood%"=="Y" ( call :process ) else ( goto begin )
 if /i "%configGood%"=="Y" (
-	if not defined startMode (
+	if not defined mode (
 		call :process
 	) else (
 		call :process_auto
@@ -354,33 +348,35 @@ if /i "%configGood%"=="Y" (
 goto quit
 
 :process
-set "status=Parsing list [!listFile!]..." & title !status! & echo. & echo !status! & echo.
+echo.
 for /f "delims=" %%t in (!listFile!) do (
 	REM Config
-	set "src=%%~t" & set "src_name=%%~nxt"
+	set src=%%~t
+	set src_name=%%~nxt
 	set "src_path=%%~dpt" & set src_path=!src_path:~0,-1!
 	set dst=!dataOut!
 	set /a count=!count!+1
-	echo Called Function=%0
-	REM echo SRC=!src! ^| PATH=!src_path! ^| NAME=!src_name!
-	REM echo DST=!dst!
-	REM pause
+	echo Function=%0
+	pause
 	
 	REM Check if item exist
 	if exist "!src!" (
 		REM Starting process
 		echo. & echo *******************************************************************************
-		echo Preparing to %choosedProcessDatastartMode% [!src_name!]...
+		echo Preparing to %choosedProcessDataMode% [!src_name!]...
 		call :detect_itemType "!src!"
 		echo Processing !itemType! [!src_name!]...
+		REM echo %processState% !itemType! From [!src_path!] To [!dataOut!]...
 		echo %processState% !itemType! From [!src_path!] To [!dst!]...
 		echo *******************************************************************************
 		
 		REM Creating output directory if not exist
+		REM if not exist "!dataOut!" mkdir "!dataOut!"
 		if not exist "!dst!" mkdir "!dst!"
 		
 		REM Construct command
-		title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
+		title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dataOut!]...
+		REM set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dataOut!"
 		set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
 		echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
 		
@@ -395,9 +391,11 @@ for /f "delims=" %%t in (!listFile!) do (
 					REM echo !itemType! [!src_name!] exist in [!dataOut!]
 					echo !itemType! [!src_name!] exist in [!dst!]
 					echo This mean it has been copied with success.
-					if /i "%processDatastartMode%"=="M" (
+					if /i "%processDataMode%"=="M" (
 						echo Deleting [!src_name!] from local...
 						call !delCMD! "!src!"
+						REM No more needed too, related to MD5
+						REM if exist "!src!.md5" del /f/q "!src!.md5"
 					)
 					echo ******************************************************************************* & echo.
 				) else (
@@ -405,7 +403,7 @@ for /f "delims=" %%t in (!listFile!) do (
 					echo Error ^^!^^! [!ERRORLEVEL!]
 					REM echo !itemType! [!src_name!] NOT EXIST in [!dataOut!]
 					echo !itemType! [!src_name!] NOT EXIST in [!dst!]
-					echo This mean there was an error during the %choosedProcessDatastartMode% process.
+					echo This mean there was an error during the %choosedProcessDataMode% process.
 					echo Stopping the script...
 					echo ******************************************************************************* & echo.
 					goto quit
@@ -424,26 +422,23 @@ for /f "delims=" %%t in (!listFile!) do (
 goto :EOF
 
 :process_auto
-set "status=Parsing list [!listFile!]..." & title !status! & echo. & echo !status! & echo.
-for /f "skip=2 tokens=1-2* delims=;" %%t in (!listFile!) do (
+echo.
+for /f "tokens=1-2* delims=|" %%t in (!listFile!) do (
 	REM Config
-	set "src=%%~t" & set "src_name=%%~nxt"
+	set src=%%~t
+	set src_name=%%~nxt
 	set "src_path=%%~dpt" & set src_path=!src_path:~0,-1!
-	if not "%%u"=="" (
-		set "dst=%%u" & set "dst_name=%%~nxu"
-		set "dst_path=%%~dpu" & set dst_path=!dst_path:~0,-1!
-	)
+	if not "%%u"=="" set dst=%%u
 	set /a count=!count!+1
-	echo Called Function=%0
-	REM echo SRC=!src! ^| PATH=!src_path! ^| NAME=!src_name!
-	REM echo DST=!dst! ^| PATH=!dst_path! ^| NAME=!dst_name!
-	REM pause
+	echo Function=%0
+	echo SRC=!src! ^| DST=!dst!
+	pause
 	
 	REM Check if item exist
 	if exist "!src!" (
 		REM Starting process
 		echo. & echo *******************************************************************************
-		echo Preparing to %choosedProcessDatastartMode% [!src_name!]...
+		echo Preparing to %choosedProcessDataMode% [!src_name!]...
 		call :detect_itemType "!src!"
 		echo Processing !itemType! [!src_name!]...
 		echo %processState% !itemType! [!src!] To [!dst!]...
@@ -452,98 +447,49 @@ for /f "skip=2 tokens=1-2* delims=;" %%t in (!listFile!) do (
 		REM Creating output directory if not exist
 		if not exist "!dst!" mkdir "!dst!"
 		
-		if not "!genericType!"=="file" (
-			REM Source directory name is equal to Destination directory name
-			REM -> Copying source directory to the destination root directory
-			if /i "!src_name!"=="!dst_name!" (
-				REM Construct command
-				echo. & echo **** Changed directory to [!dst_path!] **** & echo.
-				title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst_path!]...
-				set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst_path!"
-				echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
-				REM echo Executing command: !fdtCMD! & pause
-			) else (
-				REM Source directory name is not equal to Destination directory name
-				REM -> Copying source directory content
-				for /f "delims=" %%z in ('dir /b/a !src!') do (
-					REM echo Z=%%z
-					REM pause
-
-					REM Construct command
-					echo.
-					call :detect_itemType "!src!\%%z"
-					echo !itemType! found inside [!src!]: %%z. & echo.
-					title %processState% Directory - Content - [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-					set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! "!src!\%%z" -d "!dst!"
-					echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
-					REM echo Executing command: !fdtCMD! & pause
-					
-					REM If item is a directory, check if is not empty, only if no errors
-					REM echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
-					if !ERRORLEVEL! EQU 0 (
-						REM Checking command result
-						if exist "!dst!\%%z" (
-							echo *******************************************************************************
-							echo !itemType! [%%z] exist in [!dst!]
-							echo This mean it has been copied with success.
-							if /i "%processDatastartMode%"=="M" (
-								echo Deleting [%%z] from local...
-								call !delCMD! "!src!\%%z"
-							)
-							echo ******************************************************************************* & echo.
-						) else (
-							echo *******************************************************************************
-							echo Error ^^!^^! [!ERRORLEVEL!]
-							echo !itemType! [%%z] NOT EXIST in [!dst!]
-							echo This mean there was an error during the %choosedProcessDatastartMode% process.
-							echo Stopping the script...
-							echo ******************************************************************************* & echo.
-							goto quit
+		REM Construct command
+		title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dataOut!]...
+		
+		for /f "delims=" %%z in ('dir /b/a !src!') do (
+		
+			echo Z=%%z
+			pause
+		
+			set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! "!src!\%%z" -d "!dst!"
+			REM echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
+			echo Executing command: !fdtCMD! & pause
+			
+			REM If item is a directory, check if is not empty, only if no errors
+			REM echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
+			if !ERRORLEVEL! EQU 0 (
+				(dir /b /a "!src!" | findstr .)>NUL && (
+					REM Checking command result
+					if exist "!dst!\!src_name!" (
+						echo *******************************************************************************
+						echo !itemType! [!src_name!] exist in [!dst!]
+						echo This mean it has been copied with success.
+						if /i "%processDataMode%"=="M" (
+							echo Deleting [!src_name!] from local...
+							call !delCMD! "!src!"
 						)
+						echo ******************************************************************************* & echo.
 					) else (
-						echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
+						echo *******************************************************************************
+						echo Error ^^!^^! [!ERRORLEVEL!]
+						echo !itemType! [!src_name!] NOT EXIST in [!dst!]
+						echo This mean there was an error during the %choosedProcessDataMode% process.
+						echo Stopping the script...
+						echo ******************************************************************************* & echo.
 						goto quit
 					)
+				) || (
+					echo. & echo Location: & echo [!src!] & echo is empty, nothing to delete. Going to the next... & echo.
 				)
+			) else (
+				echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
+				goto quit
 			)
-		) else (
-			REM Construct command
-			title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-			set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
-			echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
-			REM echo Executing command: !fdtCMD! & pause
-		)
-		REM exit
-		
-		REM If item is a directory, check if is not empty, only if no errors
-		REM echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
-		if !ERRORLEVEL! EQU 0 (
-			(dir /b /a "!src!" | findstr .)>NUL && (
-				REM Checking command result
-				if exist "!dst!\!src_name!" (
-					echo *******************************************************************************
-					echo !itemType! [!src_name!] exist in [!dst!]
-					echo This mean it has been copied with success.
-					if /i "%processDatastartMode%"=="M" (
-						echo Deleting [!src_name!] from local...
-						call !delCMD! "!src!"
-					)
-					echo ******************************************************************************* & echo.
-				) else (
-					echo *******************************************************************************
-					echo Error ^^!^^! [!ERRORLEVEL!]
-					echo !itemType! [!src_name!] NOT EXIST in [!dst!]
-					echo This mean there was an error during the %choosedProcessDatastartMode% process.
-					echo Stopping the script...
-					echo ******************************************************************************* & echo.
-					goto quit
-				)
-			) || (
-				echo. & echo Location: & echo [!src!] & echo is empty, nothing to delete. Going to the next... & echo.
-			)
-		) else (
-			echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
-			goto quit
+			
 		)
 	) else (
 		echo. & echo Location: & echo [!src!] & echo does not exist. Going to the next... & echo.
