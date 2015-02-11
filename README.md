@@ -11,11 +11,15 @@ Dependencies: Java7 or above
 Platforms:
   - From the script: Windows only
   - Using parameters: Windows / Linux / Mac (if java is installed)
+    - See documentation (http://monalisa.cern.ch/FDT/documentation_fdt.html)
+    - See examples (http://monalisa.cern.ch/FDT/documentation_examples.html)
 
 Features:
   - Drag'n'Drop on script
   - Copy / Paste on script
   - Copy / Move mode
+  - CSV list parser
+    - Source;Destination
 
 Known Issues:
   - Empty folders
