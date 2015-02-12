@@ -228,9 +228,9 @@ if defined dragDrop (
 	REM Reading from script
 	set /p useList="Use list ? [Y, N] : 
 	if /i "!useList!"=="Y" (
-		set /p listFile=File list to read :
+		set /p listFile=File list to read : 
 	) else if /i "!useList!"=="N" (
-		set /p dataIn=Source drive or directory :
+		set /p dataIn=Source drive or directory : 
 		set "tempList=%temp%\tempList_%random%.txt"
 	)
 )
