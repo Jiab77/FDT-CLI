@@ -16,7 +16,7 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 12.02.2015 - 16:00
+REM Last Modification: 04.03.2015 - 17:22
 REM Last Changes:
 REM - GPL v3.0 text added
 REM - Updated path for Java8
@@ -27,6 +27,7 @@ REM - Fixed empty folder bug
 REM - Removed quotes on dragDrop variable
 REM - Fixed serious quotes handling issue
 REM - Updated CSV parsing feature
+REM - Removed line skipping from CSV feature
 
 REM TODO:
 REM - Fix issue with "()" in files and folders names
@@ -461,7 +462,7 @@ REM End Not sure
 echo Called Function=%0
 set "status=Parsing list [!listFile!]..." & title !status! & echo. & echo. & echo !status!
 REM echo Before the loop & echo.
-for /f "usebackq skip=2 tokens=1-2* delims=;" %%t in ("!listFile!") do (
+for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 	REM echo Inside the loop
 	REM Config
 	set "src=%%~t" & set "src_name=%%~nxt"
