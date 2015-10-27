@@ -1,5 +1,6 @@
 @echo off
-REM Copyright (C) 2013  Jonathan Barda <jonathan.barda@gmail.com>
+setlocal EnableDelayedExpansion
+REM Copyright (C) 2015  Jonathan Barda <jonathan.barda@gmail.com>
 
 REM This program is free software: you can redistribute it and/or modify
 REM it under the terms of the GNU General Public License as published by
@@ -16,38 +17,38 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 10.02.2015 - 22:54
+REM Last Modification: 27.10.2015 - 11:35
 REM Last Changes:
-REM - Added copyright stuff and kind of changelog
-REM - Fixed .jar file path
-REM - Fixed Java detection
-REM - Removed old copyright stuff
-REM - Removed unneeded "REM" command
-REM - GPL v3.0 text added
-REM - Updated path for Java8
+REM - Added local java binary to make the script portable
+REM - Added some debug stuff. set debug var to true to enable
+REM - Cleaned the code a bit
+REM - Added portability code in every files
 
 :begin
+REM Setting command line window
 for %%a in (cls echo) do %%a.
-setlocal EnableDelayedExpansion
 title %~nx0 - FDT CLI Updater
 
 REM FDT Config
+set debug=
 set "fdtPath=%~dp0" & set fdtPath=!fdtPath:~0,-1!
+if defined debug title %~nx0 - CLI For FDT [Debug Mode]
 
 REM Java Config
-set javaVersion=7
-if "%javaVersion%"=="7" (
-	set javaPath=jre7
-) else if "%javaVersion%"=="8" (
-	set javaBuild=1.8.0_31
-	set javaPath=jre!javaBuild!
-)
+set javaBuild=1.8.0_60
+set javaPath=!fdtPath!\java\{ARCH}\jre!javaBuild!\bin
 
-REM Adding java to the path if not already exist
+REM According the local java path to the processor architecture
 if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-	(echo "%path%" | find "%ProgramFiles%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\!javaPath!\bin"
+	REM (echo "%path%" | find "%ProgramFiles%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles%\Java\!javaPath!\bin"
+	set javaPath=!javaPath:{ARCH}=x64!
 ) else (
-	(echo "%path%" | find "%ProgramFiles(x86)%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\!javaPath!\bin"
+	REM (echo "%path%" | find "%ProgramFiles(x86)%\Java\!javaPath!\bin">NUL) || set "path=%path%;%ProgramFiles(x86)%\Java\!javaPath!\bin"
+	set javaPath=!javaPath:{ARCH}=x86!
+)
+set java=!javaPath!\java.exe
+if defined debug (
+	echo. & echo Java Executable: !java! & pause & echo.
 )
 goto detect_server
 
@@ -62,8 +63,8 @@ for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 	) else (
 		echo FDT Server not started, Good. Trying to update it... & echo.
 		pushd %fdtPath%
-		REM (java -jar fdt.jar -update >NUL) && ( call :success ) || ( call :failed )
-		java -jar fdt.jar -update >NUL
+		REM (call !java! -jar fdt.jar -update >NUL) && ( call :success ) || ( call :failed )
+		call !java! -jar fdt.jar -update >NUL
 		if !ERRORLEVEL! EQU 100 (
 			call :updated
 		) else (
