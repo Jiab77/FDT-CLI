@@ -19,7 +19,7 @@ Features:
   - Copy / Paste on script
   - Copy / Move mode
   - CSV list parser
-    - Skipped lines: 2
+    - <s>Skipped lines: 2</s>
     - Source;Destination
 
 Known Issues:
