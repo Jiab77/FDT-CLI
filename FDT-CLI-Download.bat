@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableDelayedExpansion
-REM Copyright (C) 2015  Jonathan Barda <jonathan.barda@gmail.com>
+
+REM FDT-CLI - Command line interface for FDT
+REM Copyright (C) 2015 - 2016  Jonathan Barda <jonathan.barda@gmail.com>
 
 REM This program is free software: you can redistribute it and/or modify
 REM it under the terms of the GNU General Public License as published by
