@@ -16,7 +16,7 @@ if [ "$found" == "false" ]; then
 	echo "***************************************************"
 	echo "******* Please specify the server address *********"
 	echo "***************************************************"
-	java -jar fdt.jar -h	
+	java -jar fdt.jar -h
 	exit 0
 fi
 java -jar fdt.jar $*

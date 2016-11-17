@@ -9,11 +9,11 @@ goto help
 java -jar fdt.jar %*
 goto :EOF
 :param_needed
-        echo "***************************************************"
-        echo "************** Parameters needed ******************"
-        echo "***************************************************"
-        goto help
+		echo "***************************************************"
+		echo "************** Parameters needed ******************"
+		echo "***************************************************"
+		goto help
 :help
-        java -jar fdt.jar -h
-        goto :EOF
+		java -jar fdt.jar -h
+		goto :EOF
 :end
