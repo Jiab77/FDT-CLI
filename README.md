@@ -2,9 +2,10 @@ FDT-CLI
 =======
 
 **Command Line Interface for FDT**
+  - FDT Source: https://github.com/MonALISA-CIT/fdt
   - FDT Binary: http://monalisa.cern.ch/FDT/
   - FDT License: http://monalisa.cern.ch/FDT/license.html
-  - FDT Credits: Ramiro Voicu / [MonALISA](http://monalisa.cern.ch/monalisa.html) Team
+  - FDT Credits: ~~Ramiro Voicu / [MonALISA](http://monalisa.cern.ch/monalisa.html) Team~~ @juztas
 
 **Dependencies: Java7 or above**
   - https://www.java.com/fr/download/manual_java7.jsp (version 7.x)
@@ -28,4 +29,7 @@ FDT-CLI
   - Files and folders with "()" in their names
 
 **Disclaimer:**
-  - I'm not affiliated at all to the [CERN](http://cern.ch) or the [MonALISA](http://monalisa.cern.ch/monalisa.html) Team
+  - I'm not affiliated to these teams:
+    * [CERN](http://cern.ch)
+    * [MonALISA](http://monalisa.cern.ch/monalisa.html)
+    * [MonALISA-CIT](https://github.com/MonALISA-CIT/fdt)
