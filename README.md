@@ -5,7 +5,7 @@ FDT-CLI
   - FDT Source: https://github.com/MonALISA-CIT/fdt
   - FDT Binary: http://monalisa.cern.ch/FDT/
   - FDT License: http://monalisa.cern.ch/FDT/license.html
-  - FDT Credits: ~~Ramiro Voicu / [MonALISA](http://monalisa.cern.ch/monalisa.html) Team~~ @juztas
+  - FDT Credits: ~~Ramiro Voicu / [MonALISA](http://monalisa.cern.ch/monalisa.html) Team~~ [@juztas](https://github.com/juztas)
 
 **Dependencies: Java7 or above**
   - https://www.java.com/fr/download/manual_java7.jsp (version 7.x)
