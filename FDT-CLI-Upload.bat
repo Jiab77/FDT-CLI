@@ -51,14 +51,14 @@ if defined debug (
 
 REM User questions
 set src=%*
-set /p host=Server : 
-set /p dst=Destination : 
-set fdtParamsCLT=-noupdates -c %host% -P 20
+set /p host=Server :
+set /p dst=Destination :
+set fdtParams=-noupdates -c %host% -P 20
 
 REM Initiating server connection
 echo.
-call !java! -jar %fdtPath%\fdt.jar %fdtParamsCLT% -r -d "%dst%" "%src%"
+call !java! -jar !fdtPath!\bin\fdt.jar %fdtParams% -r -d "%dst%" "%src%"
 echo.
 echo Press any key to exit...
 pause>NUL
-exit
+exit /b

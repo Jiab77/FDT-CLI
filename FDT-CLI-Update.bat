@@ -64,9 +64,9 @@ for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 		goto quit
 	) else (
 		echo FDT Server not started, Good. Trying to update it... & echo.
-		pushd %fdtPath%
+		pushd !fdtPath!
 		REM (call !java! -jar fdt.jar -update >NUL) && ( call :success ) || ( call :failed )
-		call !java! -jar fdt.jar -update >NUL
+		call !java! -jar !fdtPath!\bin\fdt.jar -update >NUL
 		if !ERRORLEVEL! EQU 100 (
 			call :updated
 		) else (
@@ -114,4 +114,4 @@ popd
 echo.
 echo Press any key to exit...
 pause>NUL
-exit
+exit /b

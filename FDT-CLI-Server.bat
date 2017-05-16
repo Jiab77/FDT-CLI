@@ -39,7 +39,7 @@ REM Server parameters :
 REM -noupdates	= Do not update the java binary before starting
 REM -bs 4M		= Size for the I/O buffers. K (KiloBytes) or M (MegaBytes) may be used as suffixes. The default value is 512K.
 REM -printStats	= Various statistics about buffer pools, sessions, etc will be printed
-set fdtParamsSRV=-noupdates -bs 4M -printStats
+set fdtParams=-noupdates -bs 4M -printStats
 
 REM Java Config
 set javaBuild=1.8.0_60
@@ -57,4 +57,4 @@ if defined debug (
 )
 
 REM Starting the server
-call !java! -jar %fdtPath%\fdt.jar %fdtParamsSRV%
+call !java! -jar !fdtPath!\bin\fdt.jar %fdtParams%

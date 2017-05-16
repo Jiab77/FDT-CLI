@@ -38,6 +38,7 @@ title %~nx0 - CLI For FDT
 REM FDT Config
 set debug=
 set "fdtPath=%~dp0" & set fdtPath=!fdtPath:~0,-1!
+set fdtJar=!fdtPath!\bin\fdt.jar
 if defined debug title %~nx0 - CLI For FDT [Debug Mode]
 
 REM Java Config
@@ -50,11 +51,12 @@ REM -noupdates	= Do not update the java binary before starting
 REM -bs 4M		= Size for the I/O buffers. K (KiloBytes) or M (MegaBytes) may be used as suffixes. The default value is 512K.
 REM -printStats	= Various statistics about buffer pools, sessions, etc will be printed
 set fdtParamsSRV=-noupdates -bs 4M
-set /p fdtServer=Enter server ip / name : 
+set /p fdtServer=Enter server ip / name :
 
 REM Client parameters :
-REM -P 6  		= Number of paralel streams to use. Default is 4. May vary the transfer speed
 REM -noupdates	= Do not update the java binary before starting
+REM -c server	= Server instance to connect
+REM -P 20  		= Number of paralel streams to use. Default is 4. May vary the transfer speed
 set fdtParamsCLT=-noupdates -c %fdtServer% -P 20
 
 REM According the local java path to the processor architecture
@@ -82,7 +84,7 @@ for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 	) else (
 		if /i "%fdtServer%"=="localhost" (
 			echo FDT Server not started. trying to start it... & echo.
-			start /min /normal "FDT Server Console" cmd /k !java! -jar %fdtPath%\fdt.jar %fdtParamsSRV%
+			start /min /normal "FDT Server Console" cmd /k !java! -jar !fdtJar! %fdtParamsSRV%
 		)
 		goto config
 	)
@@ -197,7 +199,7 @@ set countTemp=0
 set countTotal=0
 
 REM Processing Mode
-set /p processDataMode=Move or Copy ? [M, C] : 
+set /p processDataMode=Move or Copy ? [M, C] :
 if /i "%processDataMode%"=="M" (
 	set choosedProcessDataMode=move
 	set processState=Moving
@@ -232,11 +234,11 @@ if defined dragDrop (
 ) else (
 	if defined debug echo. & echo - dragDrop variable [EMPTY]
 	REM Reading from script
-	set /p useList="Use list ? [Y, N] : 
+	set /p useList="Use list ? [Y, N] :
 	if /i "!useList!"=="Y" (
-		set /p listFile=File list to read : 
+		set /p listFile=File list to read :
 	) else if /i "!useList!"=="N" (
-		set /p dataIn=Source drive or directory : 
+		set /p dataIn=Source drive or directory :
 		set "tempList=%temp%\tempList_%random%.txt"
 	)
 )
@@ -257,14 +259,14 @@ if not defined listFile (
 
 			REM Temporary count
 			for %%? in (!dataIn!) do ( set /a countTemp=!countTemp!+1 )
-			
+
 			if defined debug echo - Temporary count: !countTemp!
 
 			if !countTemp! LEQ 1 (
 				call :detect_itemType !dataIn!
 
 				if "!genericType!"=="directory" (
-					set /p processContent=!processState! content or folder itself ? [C,I] : 
+					set /p processContent=!processState! content or folder itself ? [C,I] :
 					if /i "!processContent!"=="C" (
 						for /f "delims==" %%e in ('dir /b/a !dataIn! 2^>NUL') do (
 							REM Filtering Windows cache files
@@ -343,10 +345,10 @@ if not defined startMode (
 )
 
 REM Limiting the speed
-set /p speedLimit=Limit the speed ? [Y, N] : 
+set /p speedLimit=Limit the speed ? [Y, N] :
 if /i "%speedLimit%"=="Y" (
 	set fdtLimitDefault=4M
-	set /p fdtLimit=Set limit to ^(Default^=4M^) ? [G, M] : 
+	set /p fdtLimit=Set limit to ^(Default^=4M^) ? [G, M] :
 	if "!fdtLimit!"=="" ( set "fdtLimit=!fdtLimitDefault!" )
 	set fdtParamsCLT=%fdtParamsCLT% -limit !fdtLimit!
 ) else if /i "%speedLimit%"=="N" (
@@ -374,7 +376,7 @@ if /i "%speedLimit%"=="Y" (
 	echo - Speed Limit: No
 )
 echo.
-set /p configGood=Everything is correct ? [Y, N] : 
+set /p configGood=Everything is correct ? [Y, N] :
 REM if /i "%configGood%"=="Y" ( call :process ) else ( goto begin )
 if /i "%configGood%"=="Y" (
 	if not defined startMode (
@@ -422,7 +424,7 @@ for /f "delims=" %%t in (!listFile!) do (
 			(dir /b /a "!src!" | findstr .)>NUL && (
 				REM Command construction
 				title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-				set fdtCMD=!java! -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
+				set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 				if defined debug (
 					echo Executing command:
 					echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -435,7 +437,7 @@ for /f "delims=" %%t in (!listFile!) do (
 		) else (
 			REM Command construction
 			title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-			set fdtCMD=!java! -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
+			set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 			if defined debug (
 				echo Executing command:
 				echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -527,7 +529,7 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				(dir /b /a "!src!" | findstr .)>NUL && (
 					echo. & echo **** Changed directory to [!dst_path!] **** & echo.
 					title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst_path!]...
-					set fdtCMD=!java! -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! -d "!dst_path!" "!src!"
+					set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! -d "!dst_path!" "!src!"
 					if defined debug (
 						echo Executing command:
 						echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -537,7 +539,7 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				) || (
 					REM Put some code here if you want to some text
 				)
-				
+
 				REM Checking command result
 				if defined debug echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
 				if !ERRORLEVEL! EQU 0 (
@@ -571,7 +573,7 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				REM -> Copying source directory to destination as expected
 				(dir /b /a "!src!" | findstr .)>NUL && (
 					title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-					set fdtCMD=!java! -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
+					set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 					if defined debug (
 						echo Executing command:
 						echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -620,7 +622,7 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 					REM call :detect_itemType "!src!\%%z"
 					REM echo !itemType! found inside [!src!]: %%z. & echo.
 					REM title %processState% Directory - Content - [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-					REM set fdtCMD=java -jar %fdtPath%\fdt.jar !fdtParamsCLT! "!src!\%%z" -d "!dst!"
+					REM set fdtCMD=java -jar !fdtJar! !fdtParamsCLT! "!src!\%%z" -d "!dst!"
 					REM echo Executing command: !fdtCMD! & call !fdtCMD! 2>NUL
 					REM REM echo Executing command: !fdtCMD! & pause
 
@@ -654,7 +656,7 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 		) else (
 			REM Source is a file and not a directory
 			title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-			set fdtCMD=!java! -jar %fdtPath%\fdt.jar !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
+			set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 			if defined debug (
 				echo Executing command:
 				echo !fdtCMD! & call !fdtCMD! 2>NUL

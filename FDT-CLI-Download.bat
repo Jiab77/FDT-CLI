@@ -50,9 +50,9 @@ if defined debug (
 )
 
 REM User questions
-set /p host=Server : 
-set /p src=Source : 
-set /p dst=Destination : 
+set /p host=Server :
+set /p src=Source :
+set /p dst=Destination :
 if /i not "%dst%"=="" (
 	if not exist "%dst%" mkdir "%dst%"
 )
@@ -60,8 +60,8 @@ set fdtParamsCLT=-noupdates -c %host% -P 20
 
 REM Initiating server connection
 echo.
-call !java! -jar %fdtPath%\fdt.jar %fdtParamsCLT% -pull -r -d "%dst%" "%src%"
+call !java! -jar !fdtPath!\bin\fdt.jar %fdtParamsCLT% -pull -r -d "%dst%" "%src%"
 echo.
 echo Press any key to exit...
 pause>NUL
-exit
+exit /b
