@@ -19,13 +19,6 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 27.10.2015 - 11:35
-REM Last Changes:
-REM - Added local java binary to make the script portable
-REM - Added some debug stuff. set debug var to true to enable
-REM - Cleaned the code a bit
-REM - Added portability code in every files
-
 REM Setting command line window
 for %%a in (cls echo echo) do %%a.
 title FDT-CLI Server Console
@@ -57,4 +50,4 @@ if defined debug (
 )
 
 REM Starting the server
-call !java! -jar !fdtPath!\bin\fdt.jar %fdtParams%
+call "!java!" -jar "!fdtPath!\bin\fdt.jar" %fdtParams%

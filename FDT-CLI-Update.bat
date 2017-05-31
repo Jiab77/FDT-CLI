@@ -19,13 +19,6 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 27.10.2015 - 11:35
-REM Last Changes:
-REM - Added local java binary to make the script portable
-REM - Added some debug stuff. set debug var to true to enable
-REM - Cleaned the code a bit
-REM - Added portability code in every files
-
 :begin
 REM Setting command line window
 for %%a in (cls echo) do %%a.
@@ -64,9 +57,9 @@ for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 		goto quit
 	) else (
 		echo FDT Server not started, Good. Trying to update it... & echo.
-		pushd !fdtPath!
+		pushd "!fdtPath!"
 		REM (call !java! -jar fdt.jar -update >NUL) && ( call :success ) || ( call :failed )
-		call !java! -jar !fdtPath!\bin\fdt.jar -update >NUL
+		call "!java!" -jar "!fdtPath!\bin\fdt.jar" -update >NUL
 		if !ERRORLEVEL! EQU 100 (
 			call :updated
 		) else (

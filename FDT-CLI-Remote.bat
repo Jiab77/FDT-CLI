@@ -19,13 +19,6 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 REM 32Bit and 64Bit Version
 
-REM Last Modification: 27.10.2015 - 11:35
-REM Last Changes:
-REM - Added local java binary to make the script portable
-REM - Added some debug stuff. set debug var to true to enable
-REM - Cleaned the code a bit
-REM - Added portability code in every files
-
 REM TODO:
 REM - Fix issue with "()" in files and folders names
 
@@ -51,15 +44,13 @@ REM -noupdates	= Do not update the java binary before starting
 REM -bs 4M		= Size for the I/O buffers. K (KiloBytes) or M (MegaBytes) may be used as suffixes. The default value is 512K.
 REM -printStats	= Various statistics about buffer pools, sessions, etc will be printed
 set fdtParamsSRV=-noupdates -bs 4M
+set /p fdtServer=Enter server ip / name :
 
 REM Client parameters :
 REM -noupdates	= Do not update the java binary before starting
-REM -nbio		= (non) blocking I/O mode
-REM -iof 3		= I/O retry count
-REM -P 6  		= Number of paralel streams to use. Default is 4. May vary the transfer speed
 REM -c server	= Server instance to connect
-set fdtParamsCLT=-noupdates -nbio -iof 3 -P 6 -c localhost
-REM set fdtParamsCLT=-noupdates -c localhost
+REM -P 20  		= Number of paralel streams to use. Default is 4. May vary the transfer speed
+set fdtParamsCLT=-noupdates -c %fdtServer% -P 20
 
 REM According the local java path to the processor architecture
 if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
@@ -84,8 +75,10 @@ for /f "delims=" %%s in ('netstat -ano ^| find /c /i "54321"') do (
 		echo FDT Server already started, Good. & echo.
 		goto config
 	) else (
-		echo FDT Server not started. trying to start it... & echo.
-		start /min /normal "FDT Server Console" cmd /k !java! -jar !fdtJar! %fdtParamsSRV%
+		if /i "%fdtServer%"=="localhost" (
+			echo FDT Server not started. trying to start it... & echo.
+			start /min /normal "FDT Server Console" cmd /k "!java!" -jar "!fdtJar!" %fdtParamsSRV%
+		)
 		goto config
 	)
 )
@@ -177,6 +170,7 @@ for /f "delims==" %%I in ("%~1") do (
 		set delCMD=del /f/q
 	)
 )
+if not "!itemType!"=="" echo Detected... !itemType!
 goto :EOF
 
 :config
@@ -413,15 +407,17 @@ for /f "delims=" %%t in (!listFile!) do (
 		echo %processState% !itemType! From [!src_path!] To [!dst!]...
 		echo *******************************************************************************
 
-		REM Creating output directory if not exist
-		if not exist "!dst!" mkdir "!dst!"
+		REM Creating output directory if not exist (only if server runs on localhost)
+		if /i "%fdtServer%"=="localhost" (
+			if not exist "!dst!" mkdir "!dst!"
+		)
 
 		REM Fix for empty folders
 		if not "!genericType!"=="file" (
 			(dir /b /a "!src!" | findstr .)>NUL && (
 				REM Command construction
-				title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-				set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
+				title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
+				set fdtCMD="!java!" -jar "!fdtJar!" !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 				if defined debug (
 					echo Executing command:
 					echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -433,8 +429,8 @@ for /f "delims=" %%t in (!listFile!) do (
 			)
 		) else (
 			REM Command construction
-			title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-			set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
+			title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
+			set fdtCMD="!java!" -jar "!fdtJar!" !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 			if defined debug (
 				echo Executing command:
 				echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -446,23 +442,26 @@ for /f "delims=" %%t in (!listFile!) do (
 		REM Checking command result
 		if defined debug echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
 		if !ERRORLEVEL! EQU 0 (
-			if exist "!dst!\!src_name!" (
-				echo. & echo *******************************************************************************
-				echo !itemType! [!src_name!] exist in [!dst!]
-				echo This mean it has been copied with success.
-				if /i "%processDataMode%"=="M" (
-					echo Deleting [!src_name!] from local...
-					call !delCMD! "!src!"
+			REM Checking the destination only if server runs on localhost
+			if /i "%fdtServer%"=="localhost" (
+				if exist "!dst!\!src_name!" (
+					echo. & echo *******************************************************************************
+					echo !itemType! [!src_name!] exist in [!dst!]
+					echo This mean it has been copied with success.
+					if /i "%processDataMode%"=="M" (
+						echo Deleting [!src_name!] from local...
+						call !delCMD! "!src!"
+					)
+					echo ******************************************************************************* & echo.
+				) else (
+					echo. & echo *******************************************************************************
+					echo Error ^^!^^! [!ERRORLEVEL!]
+					echo !itemType! [!src_name!] NOT EXIST in [!dst!]
+					echo This mean there was an error during the %choosedProcessDataMode% process.
+					echo Stopping the script...
+					echo ******************************************************************************* & echo.
+					goto quit
 				)
-				echo ******************************************************************************* & echo.
-			) else (
-				echo. & echo *******************************************************************************
-				echo Error ^^!^^! [!ERRORLEVEL!]
-				echo !itemType! [!src_name!] NOT EXIST in [!dst!]
-				echo This mean there was an error during the %choosedProcessDataMode% process.
-				echo Stopping the script...
-				echo ******************************************************************************* & echo.
-				goto quit
 			)
 		) else (
 			if !ERRORLEVEL! EQU 1 (
@@ -511,8 +510,10 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 		echo %processState% !itemType! [!src!] To [!dst!]...
 		echo *******************************************************************************
 
-		REM Creating output directory if not exist
-		if not exist "!dst!" mkdir "!dst!"
+		REM Creating output directory if not exist (only if server runs on localhost)
+		if /i "%fdtServer%"=="localhost" (
+			if not exist "!dst!" mkdir "!dst!"
+		)
 
 		if not "!genericType!"=="file" (
 			REM Source directory name is equal to Destination directory name
@@ -520,8 +521,8 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 			if /i "!src_name!"=="!dst_name!" (
 				(dir /b /a "!src!" | findstr .)>NUL && (
 					echo. & echo **** Changed directory to [!dst_path!] **** & echo.
-					title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst_path!]...
-					set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst_path!"
+					title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst_path!]...
+					set fdtCMD="!java!" -jar "!fdtJar!" !fdtParamsCLT! !fdtRecursive! -d "!dst_path!" "!src!"
 					if defined debug (
 						echo Executing command:
 						echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -535,23 +536,26 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				REM Checking command result
 				if defined debug echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
 				if !ERRORLEVEL! EQU 0 (
-					if exist "!dst_path!\!src_name!" (
-						echo. & echo *******************************************************************************
-						echo !itemType! [!src_name!] exist in [!dst_path!]
-						echo This mean it has been copied with success.
-						if /i "%processDataMode%"=="M" (
-							echo Deleting [!src_name!] from local...
-							call !delCMD! "!src!"
+					REM Checking the destination only if server runs on localhost
+					if /i "%fdtServer%"=="localhost" (
+						if exist "!dst_path!\!src_name!" (
+							echo. & echo *******************************************************************************
+							echo !itemType! [!src_name!] exist in [!dst_path!]
+							echo This mean it has been copied with success.
+							if /i "%processDataMode%"=="M" (
+								echo Deleting [!src_name!] from local...
+								call !delCMD! "!src!"
+							)
+							echo ******************************************************************************* & echo.
+						) else (
+							echo. & echo *******************************************************************************
+							echo Error ^^!^^! [!ERRORLEVEL!]
+							echo !itemType! [!src_name!] NOT EXIST in [!dst_path!]
+							echo This mean there was an error during the %choosedProcessDataMode% process.
+							echo Stopping the script...
+							echo ******************************************************************************* & echo.
+							goto quit
 						)
-						echo ******************************************************************************* & echo.
-					) else (
-						echo. & echo *******************************************************************************
-						echo Error ^^!^^! [!ERRORLEVEL!]
-						echo !itemType! [!src_name!] NOT EXIST in [!dst_path!]
-						echo This mean there was an error during the %choosedProcessDataMode% process.
-						echo Stopping the script...
-						echo ******************************************************************************* & echo.
-						goto quit
 					)
 				) else (
 					echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
@@ -561,8 +565,8 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				REM Source directory name is not equal to Destination directory name
 				REM -> Copying source directory to destination as expected
 				(dir /b /a "!src!" | findstr .)>NUL && (
-					title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-					set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
+					title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
+					set fdtCMD="!java!" -jar "!fdtJar!" !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 					if defined debug (
 						echo Executing command:
 						echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -576,23 +580,26 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 				REM Checking command result
 				if defined debug echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
 				if !ERRORLEVEL! EQU 0 (
-					if exist "!dst!\!src_name!" (
-						echo. & echo *******************************************************************************
-						echo !itemType! [!src_name!] exist in [!dst!]
-						echo This mean it has been copied with success.
-						if /i "%processDataMode%"=="M" (
-							echo Deleting [!src_name!] from local...
-							call !delCMD! "!src!"
+					REM Checking the destination only if server runs on localhost
+					if /i "%fdtServer%"=="localhost" (
+						if exist "!dst!\!src_name!" (
+							echo. & echo *******************************************************************************
+							echo !itemType! [!src_name!] exist in [!dst!]
+							echo This mean it has been copied with success.
+							if /i "%processDataMode%"=="M" (
+								echo Deleting [!src_name!] from local...
+								call !delCMD! "!src!"
+							)
+							echo ******************************************************************************* & echo.
+						) else (
+							echo. & echo *******************************************************************************
+							echo Error ^^!^^! [!ERRORLEVEL!]
+							echo !itemType! [!src_name!] NOT EXIST in [!dst!]
+							echo This mean there was an error during the %choosedProcessDataMode% process.
+							echo Stopping the script...
+							echo ******************************************************************************* & echo.
+							goto quit
 						)
-						echo ******************************************************************************* & echo.
-					) else (
-						echo. & echo *******************************************************************************
-						echo Error ^^!^^! [!ERRORLEVEL!]
-						echo !itemType! [!src_name!] NOT EXIST in [!dst!]
-						echo This mean there was an error during the %choosedProcessDataMode% process.
-						echo Stopping the script...
-						echo ******************************************************************************* & echo.
-						goto quit
 					)
 				) else (
 					echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
@@ -641,8 +648,8 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 			)
 		) else (
 			REM Source is a file and not a directory
-			title %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
-			set fdtCMD=!java! -jar !fdtJar! !fdtParamsCLT! !fdtRecursive! "!src!" -d "!dst!"
+			title %fdtServer% ^| %processState% !itemType! [!count!/!countTotal!] ^| [!src_name!] From [!src_path!] To [!dst!]...
+			set fdtCMD="!java!" -jar "!fdtJar!" !fdtParamsCLT! !fdtRecursive! -d "!dst!" "!src!"
 			if defined debug (
 				echo Executing command:
 				echo !fdtCMD! & call !fdtCMD! 2>NUL
@@ -653,23 +660,26 @@ for /f "usebackq tokens=1-2* delims=;" %%t in ("!listFile!") do (
 			REM Checking command result
 			if defined debug echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
 			if !ERRORLEVEL! EQU 0 (
-				if exist "!dst!\!src_name!" (
-					echo. & echo *******************************************************************************
-					echo !itemType! [!src_name!] exist in [!dst!]
-					echo This mean it has been copied with success.
-					if /i "%processDataMode%"=="M" (
-						echo Deleting [!src_name!] from local...
-						call !delCMD! "!src!"
+				REM Checking the destination only if server runs on localhost
+				if /i "%fdtServer%"=="localhost" (
+					if exist "!dst!\!src_name!" (
+						echo. & echo *******************************************************************************
+						echo !itemType! [!src_name!] exist in [!dst!]
+						echo This mean it has been copied with success.
+						if /i "%processDataMode%"=="M" (
+							echo Deleting [!src_name!] from local...
+							call !delCMD! "!src!"
+						)
+						echo ******************************************************************************* & echo.
+					) else (
+						echo. & echo *******************************************************************************
+						echo Error ^^!^^! [!ERRORLEVEL!]
+						echo !itemType! [!src_name!] NOT EXIST in [!dst!]
+						echo This mean there was an error during the %choosedProcessDataMode% process.
+						echo Stopping the script...
+						echo ******************************************************************************* & echo.
+						goto quit
 					)
-					echo ******************************************************************************* & echo.
-				) else (
-					echo. & echo *******************************************************************************
-					echo Error ^^!^^! [!ERRORLEVEL!]
-					echo !itemType! [!src_name!] NOT EXIST in [!dst!]
-					echo This mean there was an error during the %choosedProcessDataMode% process.
-					echo Stopping the script...
-					echo ******************************************************************************* & echo.
-					goto quit
 				)
 			) else (
 				echo. & echo RETURNED ERRORLEVEL CODE: !ERRORLEVEL! & echo.
