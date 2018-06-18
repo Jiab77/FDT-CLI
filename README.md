@@ -1,35 +1,32 @@
-FDT-CLI
-=======
+# Bye bye Github...
 
-**Command Line Interface for FDT**
-  - FDT Source: https://github.com/MonALISA-CIT/fdt
-  - FDT Binary: http://monalisa.cern.ch/FDT/
-  - FDT License: http://monalisa.cern.ch/FDT/license.html
-  - FDT Credits: ~~Ramiro Voicu / [MonALISA](http://monalisa.cern.ch/monalisa.html) Team~~ [@juztas](https://github.com/juztas)
+Why do I'm leaving Github ?
 
-**Dependencies: Java7 or above**
-  - https://www.java.com/fr/download/manual_java7.jsp (version 7.x)
-  - https://www.java.com/fr/download/manual.jsp (version 8.x)
+> Because I can't live with the idea that Microsoft now owns the biggest place where the open source code is / was hosted.
 
-**Platforms:**
-  - From the script: Windows only
-  - Using parameters: Windows / Linux / Mac (if java is installed)
-    - See documentation (http://monalisa.cern.ch/FDT/documentation_fdt.html)
-    - See examples (http://monalisa.cern.ch/FDT/documentation_examples.html)
+And ?
 
-**Features:**
-  - Drag'n'Drop on script
-  - Copy / Paste on script
-  - Copy / Move mode
-  - CSV list parser
-    - ~~Skipped lines: 2~~
-    - Source;Destination
+> Also because Github didn't took the time to ask us, developpers, users, if we would be ok with this operation and my reply would be **NO!**
 
-**Known Issues:**
-  - Files and folders with "()" in their names
+# New home
 
-**Disclaimer:**
-  - I'm not affiliated to these teams:
-    * [CERN](http://cern.ch)
-    * [MonALISA](http://monalisa.cern.ch/monalisa.html)
-    * [MonALISA-CIT](https://github.com/MonALISA-CIT/fdt)
+But where could you find my code now ?
+
+> I just moved to Gitlab as many other devs did.
+
+# Gists
+
+My gists will stay on Github for few reasons:
+
+ * Github has a better audience on Google
+ * Did not found the same feature with the same visibility on Gitlab
+
+Place of my gists: https://gist.github.com/jiab77
+
+# Projects
+
+I might just keep the projects names on Github too for the same reason as above, but with only the present file and a link to the new project home.
+
+# Repository
+
+The new place is here: https://gitlab.com/jiab77/FDT-CLI
